@@ -154,13 +154,21 @@ public class FlightSteps {
     @When("When the client sends a DELETE request to delete flight with flightId = {int}")
     public void deleteFlightById(int flightId) {
         try {
-            // Accept both 200 OK and 404 Not Found
-            SuccessResponse successResponse = apiCalls.doDelete(new int[]{SC_OK, SC_NOT_FOUND}, SuccessResponse.class, "flights/" + flightId);
-            storage.setLastApiCallSuccessResponse(successResponse);
+            Object response = apiCalls.doDelete(new int[]{SC_OK, SC_NOT_FOUND}, "flights/" + flightId);
+
+            if (response instanceof SuccessResponse) {
+                SuccessResponse successResponse = (SuccessResponse) response;
+                storage.setLastApiCallSuccessResponse(successResponse);
+            } else if (response instanceof ErrorResponse) {
+                ErrorResponse errorResponse = (ErrorResponse) response;
+                storage.setLastApiCallErrorResponse(errorResponse);
+            }
+
         } catch (Exception e) {
             log.error("Error occurred while deleting flight with ID: " + flightId, e);
         }
     }
+
 
 
     @Then("the API should return code = {int} with message = {string} for deleted flight")

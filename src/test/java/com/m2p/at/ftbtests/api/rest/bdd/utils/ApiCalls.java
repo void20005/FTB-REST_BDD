@@ -1,12 +1,18 @@
 package com.m2p.at.ftbtests.api.rest.bdd.utils;
+import static com.m2p.at.ftbtests.api.rest.bdd.steps.FlightSteps.SC_NOT_FOUND;
 import static io.restassured.RestAssured.given;
+import static org.apache.http.HttpStatus.SC_OK;
 import static org.hamcrest.Matchers.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.m2p.at.ftbtests.api.rest.bdd.config.AppConfig;
+import com.m2p.at.ftbtests.api.rest.bdd.model.api.ErrorResponse;
+import com.m2p.at.ftbtests.api.rest.bdd.model.api.SuccessResponse;
 import io.qameta.allure.restassured.AllureRestAssured;
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.equalTo;
+
+import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpHeaders;
@@ -77,11 +83,10 @@ public class ApiCalls {
                 .log().all()
                 .headers(headers);
     }
-    public <R> R doDelete(int[] expectedStatuses, Class<R> responseClass, String path, Object... pathParams) {
+    public Object doDelete(int[] expectedStatuses, String path, Object... pathParams) {
         log.info("Sending DELETE for: {}({})", path, Arrays.toString(pathParams));
 
-        // Wrap each expected status with 'equalTo'
-        return given()
+        Response response = given()
                 .spec(this.reqSpec)
                 .delete(path, pathParams)
                 .then().log().all()
@@ -90,7 +95,17 @@ public class ApiCalls {
                 .statusCode(anyOf(Arrays.stream(expectedStatuses)
                         .mapToObj(org.hamcrest.Matchers::equalTo)
                         .toArray(org.hamcrest.Matcher[]::new)))  // Ensure proper wrapping with equalTo
-                .extract().response().as(responseClass);
+                .extract().response();
+
+        // Check the status code and deserialize accordingly
+        int statusCode = response.getStatusCode();
+        if (statusCode == SC_OK) {
+            return response.as(SuccessResponse.class);
+        } else if (statusCode == SC_NOT_FOUND) {
+            return response.as(ErrorResponse.class);
+        }
+
+        throw new RuntimeException("Unexpected status code: " + statusCode);
     }
 
 
