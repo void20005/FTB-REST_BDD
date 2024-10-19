@@ -35,7 +35,7 @@ Feature: Flight API validation
 
   Scenario: DELETE specific flight data by its ID
     Given FTB is up and running and the tests are configured
-    When the client sends a DELETE request to delete flight with flightId = 14361
-    Then the API should return code = 200 with message = "Deleted Flight by Id=14361" for deleted flight
-    And When the client sends a DELETE request to delete flight with flightId = 14361
+    When the client sends a DELETE request to delete flight with flightId = 14362
+    Then the API should return code = 200 with message = "Deleted Flight by Id=14362" for deleted flight
+    And When the client sends a DELETE request to delete flight with flightId = 14362
     Then the API should return expectedStatusCode = "404 NOT_FOUND" with expectedErrorMessage = "Entity not found."
