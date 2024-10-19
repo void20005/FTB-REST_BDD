@@ -1,0 +1,8 @@
+# Full 'Create an aircraft' scenario:
+  Scenario: Create an aircraft
+    Given FTB is up and running and the tests are configured
+    When client tries to create an Aircraft having manufacturer='Test' and model='TestModel' and number of seats=11
+    Then returned aircraft data to be manufacturer='Test' and model='TestModel' and number of seats=11
+    When client gets details of just created Aircraft
+    Then aircraft data to be manufacturer='Test' and model='TestModel' and number of seats=11
+
